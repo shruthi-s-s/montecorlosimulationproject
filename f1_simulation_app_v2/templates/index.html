@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 Championship Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 50%, #0a0a0a 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 30, 0, 0.03) 2px,
+          rgba(255, 30, 0, 0.03) 4px
+        );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .racing-stripes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: repeating-linear-gradient(
+        90deg,
+        #ff1e00 0px,
+        #ff1e00 40px,
+        #ffffff 40px,
+        #ffffff 80px
+      );
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(255, 30, 0, 0.5);
+    }
+
+    .racing-stripes.bottom {
+      top: auto;
+      bottom: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 30, 0, 0.2) 0%, transparent 70%);
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5em;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff1e00 0%, #ff6b00 50%, #ff1e00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 40px rgba(255, 30, 0, 0.3);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 5px rgba(255, 30, 0, 0.5)); }
+      to { filter: drop-shadow(0 0 20px rgba(255, 30, 0, 0.8)); }
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      color: #999;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    .main-card {
+      background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 
+        0 10px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 30, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 30, 0, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .main-card:hover::before {
+      left: 100%;
+    }
+
+    .info-text {
+      text-align: center;
+      font-size: 1.1em;
+      color: #ccc;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .simulate-btn {
+      display: block;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #ff1e00 0%, #c30000 100%);
+      border: none;
+      color: #fff;
+      padding: 18px 40px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1.3em;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 
+        0 5px 20px rgba(255, 30, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simulate-btn::before {
+      content: '🏁';
+      position: absolute;
+      left: 20px;
+      font-size: 1.2em;
+    }
+
+    .simulate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 30px rgba(255, 30, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .simulate-btn:active {
+      transform: translateY(0);
+    }
+
+    .simulate-btn:disabled {
+      background: linear-gradient(135deg, #666 0%, #444 100%);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #output {
+      margin-top: 40px;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 1.3em;
+      color: #ff6b00;
+      padding: 40px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .results-header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5em;
+      color: #ff6b00;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, #222 0%, #1a1a1a 100%);
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      border: 1px solid rgba(255, 30, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 30, 0, 0.6);
+      box-shadow: 0 10px 30px rgba(255, 30, 0, 0.2);
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #ff1e00;
+      text-shadow: 0 0 20px rgba(255, 30, 0, 0.5);
+    }
+
+    .note-box {
+      background: rgba(255, 30, 0, 0.1);
+      border-left: 4px solid #ff1e00;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    .scenarios-section h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8em;
+      color: #ff6b00;
+      margin-bottom: 25px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .scenario {
+      background: linear-gradient(145deg, #1a1a1a 0%, #111 100%);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 30, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .scenario:hover {
+      border-color: rgba(255, 30, 0, 0.5);
+      box-shadow: 0 5px 20px rgba(255, 30, 0, 0.15);
+    }
+
+    .scenario h4 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4em;
+      color: #ff6b00;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(255, 30, 0, 0.3);
+    }
+
+    .race-result {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 3px solid #ff1e00;
+    }
+
+    .race-name {
+      font-weight: 700;
+      color: #ff6b00;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+    }
+
+    .race-details {
+      color: #ccc;
+      font-size: 0.95em;
+    }
+
+    .final-points {
+      background: rgba(255, 30, 0, 0.15);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+
+    .final-points strong {
+      color: #ff6b00;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      .main-card {
+        padding: 25px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .simulate-btn {
+        font-size: 1.1em;
+        padding: 15px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="racing-stripes"></div>
+  <div class="racing-stripes bottom"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🏎️ F1 Championship</h1>
+      <p class="subtitle">Monte Carlo Simulator</p>
+    </div>
+
+    <div class="main-card">
+      <p class="info-text">
+        Run 10,000 simulations to calculate Max Verstappen's championship probability.<br>
+        <strong>Current standings:</strong> Max (321 pts) vs Lando (357 pts) vs Oscar (356 pts)
+      </p>
+      
+      <button class="simulate-btn" id="simulateBtn">Run Simulation</button>
+      
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('simulateBtn');
+    const out = document.getElementById('output');
+    
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      out.innerHTML = '<div class="loading">🏁 Running 10,000 simulations...<br>This may take a few seconds.</div>';
+      
+      try {
+        const res = await fetch('/simulate');
+        const data = await res.json();
+        
+        let html = '<div class="results-header"><h2>🏆 Simulation Results</h2></div>';
+        
+        html += '<div class="stats-grid">';
+        html += `
+          <div class="stat-card">
+            <div class="stat-label">Winning Scenarios</div>
+            <div class="stat-value">${data.total_wins.toLocaleString()}</div>
+            <div class="stat-label">out of 10,000</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Win Probability</div>
+            <div class="stat-value">${data.probability}%</div>
+            <div class="stat-label">for Max Verstappen</div>
+          </div>
+        `;
+        html += '</div>';
+        
+        html += `<div class="note-box">📊 ${data.note}</div>`;
+        
+        if (data.examples && data.examples.length > 0) {
+          html += '<div class="scenarios-section">';
+          html += '<h3>🎯 Example Winning Scenarios</h3>';
+          
+          data.examples.forEach((ex, idx) => {
+            html += `<div class="scenario">`;
+            html += `<h4>Scenario ${idx + 1}</h4>`;
+            
+            ex.results.forEach(r => {
+              html += `<div class="race-result">`;
+              html += `<div class="race-name">🏁 ${r.race}</div>`;
+              html += `<div class="race-details">Main Race: ${r.main}</div>`;
+              if (r.sprint !== '—') {
+                html += `<div class="race-details">Sprint: ${r.sprint}</div>`;
+              }
+              html += `</div>`;
+            });
+            
+            html += `<div class="final-points">`;
+            html += `<strong>Final Points:</strong> `;
+            html += `Max ${ex.totals['Max Verstappen']} pts | `;
+            html += `Lando ${ex.totals['Lando Norris']} pts | `;
+            html += `Oscar ${ex.totals['Oscar Piastri']} pts`;
+            html += `</div>`;
+            html += `</div>`;
+          });
+          
+          html += '</div>';
+        } else {
+          html += '<div class="note-box">❌ No winning scenarios found in the simulations.</div>';
+        }
+        
+        out.innerHTML = html;
+      } catch (error) {
+        out.innerHTML = `<div class="note-box">⚠️ Error running simulation: ${error.message}</div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
