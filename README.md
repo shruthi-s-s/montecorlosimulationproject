@@ -1,4 +1,4 @@
-# 🏎️ Max Verstappen World Championship Prediction Simulation – 2025 Season
+# 🏎️ F1 Championship Prediction using Monte Carlo Simulation
 
 ## 📘 Overview
 A Python simulation that predicts how **Max Verstappen** can still win the **2025 Formula 1 World Championship** using a **Monte Carlo approach**.  
